@@ -72,7 +72,7 @@ class AppTheme {
         ),
         hintStyle: AppTypography.body.copyWith(color: AppColors.lightGrey),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.primaryWhite,
         elevation: 10,
         shadowColor: AppColors.charcoalBlack.withOpacity(0.05),

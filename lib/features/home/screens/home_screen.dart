@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
+import '../../../dummy_data/mock_data.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -129,7 +131,13 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildCategoriesList() {
-    final categories = ['Yoga', 'Massage', 'Retreats', 'Boutique', 'Concierge'];
+    final categories = [
+      {'name': 'Yoga', 'icon': Icons.self_improvement},
+      {'name': 'Massage', 'icon': Icons.spa},
+      {'name': 'Retreats', 'icon': Icons.holiday_village},
+      {'name': 'Boutique', 'icon': Icons.shopping_bag_outlined},
+      {'name': 'Concierge', 'icon': Icons.room_service_outlined},
+    ];
     return SizedBox(
       height: 100,
       child: ListView.builder(
@@ -137,6 +145,7 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: categories.length,
         itemBuilder: (context, index) {
+          final cat = categories[index];
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Column(
@@ -149,10 +158,10 @@ class HomeScreen extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.lightGrey),
                   ),
-                  child: const Icon(Icons.spa, color: AppColors.forestGreen),
+                  child: Icon(cat['icon'] as IconData, color: AppColors.forestGreen),
                 ),
                 const SizedBox(height: 8),
-                Text(categories[index], style: AppTypography.caption),
+                Text(cat['name'] as String, style: AppTypography.caption),
               ],
             ),
           );
@@ -162,33 +171,40 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildTrendingProducts() {
+    final products = MockData.products;
     return SizedBox(
       height: 250,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: 4,
+        itemCount: products.length,
         itemBuilder: (context, index) {
+          final product = products[index];
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: SizedBox(
-              width: 160,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: CachedNetworkImage(
-                        imageUrl: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-                        fit: BoxFit.cover,
+            child: GestureDetector(
+              onTap: () {
+                context.push('/product/${product.id}');
+              },
+              child: SizedBox(
+                width: 160,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: CachedNetworkImage(
+                          imageUrl: product.imageUrl,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text('Organic Lavender Oil', style: AppTypography.body.copyWith(fontWeight: FontWeight.w500)),
-                  Text('CHF 45.00', style: AppTypography.body.copyWith(color: AppColors.forestGreen)),
-                ],
+                    const SizedBox(height: 12),
+                    Text(product.title, style: AppTypography.body.copyWith(fontWeight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text('CHF ${product.price.toStringAsFixed(2)}', style: AppTypography.body.copyWith(color: AppColors.forestGreen)),
+                  ],
+                ),
               ),
             ),
           );

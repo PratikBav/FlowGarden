@@ -34,8 +34,11 @@ class _SplashScreenState extends State<SplashScreen> {
               width: 200,
             )
             .animate()
-            .fade(duration: 1.seconds)
-            .scale(begin: const Offset(0.8, 0.8), end: const Offset(1.0, 1.0), curve: Curves.easeOutCubic),
+            .fade(duration: 1.seconds, curve: Curves.easeIn)
+            .scale(begin: const Offset(0.5, 0.5), end: const Offset(1.0, 1.0), curve: Curves.elasticOut, duration: 1500.ms)
+            .shimmer(delay: 800.ms, duration: 1200.ms, color: AppColors.forestGreen.withValues(alpha: 0.3))
+            .then(delay: 500.ms)
+            .slideY(end: -0.2, curve: Curves.easeInOutCubic, duration: 800.ms),
             const SizedBox(height: 24),
             Text(
               'THE FLOW GARDEN',
@@ -44,9 +47,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 fontSize: 24,
               ),
             )
-            .animate(delay: 500.ms)
+            .animate(delay: 1500.ms)
             .fade(duration: 800.ms)
-            .slideY(begin: 0.2, end: 0, curve: Curves.easeOut),
+            .slideY(begin: 0.5, end: 0, curve: Curves.easeOut),
           ],
         ),
       ),
