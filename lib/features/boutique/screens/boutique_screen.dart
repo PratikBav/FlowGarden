@@ -105,15 +105,16 @@ class _BoutiqueScreenState extends State<BoutiqueScreen> {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
               ),
-              itemCount: MockData.products.length * 4, // Multiplying to simulate more products
+              itemCount: MockData.products.length,
               itemBuilder: (context, index) {
-                final product = MockData.products[index % MockData.products.length];
+                final product = MockData.products[index];
                 return Stack(
                   children: [
                     ProductCard(
                       imageUrl: product.imageUrl,
                       title: product.title,
                       price: 'CHF ${product.price.toStringAsFixed(2)}',
+                      index: index,
                       onTap: () {
                         context.push('/product/${product.id}');
                       },

@@ -9,6 +9,7 @@ class AppColors {
   static const Color forestGreen = Color(0xFF2C5545); // Luxury dark green
   static const Color lightGrey = Color(0xFFE5E5E5);
   static const Color charcoalBlack = Color(0xFF1A1A1A);
+  static const Color secondaryGold = Color(0xFFD4AF37);
 
   // Semantic Colors
   static const Color successEmerald = Color(0xFF10B981);

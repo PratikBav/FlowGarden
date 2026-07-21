@@ -4,13 +4,16 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
+import '../../../core/widgets/cards/product_card.dart';
 import '../../../dummy_data/mock_data.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/providers/navigation_provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.primaryWhite,
       body: CustomScrollView(
@@ -20,15 +23,19 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeroBanner(context),
+                _buildHeroBanner(context, ref),
                 _buildSectionTitle(context, 'Featured Categories'),
-                _buildCategoriesList(),
-                _buildSectionTitle(context, 'Trending Boutique'),
+                _buildCategoriesList(ref),
+                _buildSectionTitle(context, 'Trending Boutique', onSeeAll: () {
+                  ref.read(navigationProvider.notifier).setTab(1);
+                }),
                 _buildTrendingProducts(),
-                _buildSectionTitle(context, 'Wellness & Healing'),
-                _buildWellnessPromo(context),
-                _buildSectionTitle(context, 'Luxury Rentals'),
-                _buildRentalsList(),
+                _buildSectionTitle(context, 'Wellness & Healing', onSeeAll: () {
+                  ref.read(navigationProvider.notifier).setTab(2);
+                }),
+                _buildWellnessPromo(context, ref),
+                _buildSectionTitle(context, 'Luxury Rentals', route: '/rentals'),
+                _buildRentalsList(context),
                 _buildNewsletter(context),
                 const SizedBox(height: 100), // padding for bottom nav
               ],
@@ -62,7 +69,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeroBanner(BuildContext context) {
+  Widget _buildHeroBanner(BuildContext context, WidgetRef ref) {
     return Container(
       height: 400,
       width: double.infinity,
@@ -98,7 +105,9 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 16),
               PrimaryButton(
                 text: 'Explore Wellness',
-                onPressed: () {},
+                onPressed: () {
+                  ref.read(navigationProvider.notifier).setTab(2);
+                },
                 isFullWidth: false,
               ),
             ],
@@ -108,7 +117,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
+  Widget _buildSectionTitle(BuildContext context, String title, {String? route, VoidCallback? onSeeAll}) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 40, 24, 16),
       child: Row(
@@ -118,19 +127,20 @@ class HomeScreen extends StatelessWidget {
             title,
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          TextButton(
-            onPressed: () {},
-            child: Text(
-              'View All',
-              style: AppTypography.buttonText.copyWith(color: AppColors.forestGreen),
+          if (route != null || onSeeAll != null)
+            TextButton(
+              onPressed: onSeeAll ?? (route != null ? () => context.push(route) : null),
+              child: Text(
+                'View All',
+                style: AppTypography.buttonText.copyWith(color: AppColors.forestGreen),
+              ),
             ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildCategoriesList() {
+  Widget _buildCategoriesList(WidgetRef ref) {
     final categories = [
       {'name': 'Yoga', 'icon': Icons.self_improvement},
       {'name': 'Massage', 'icon': Icons.spa},
@@ -146,10 +156,28 @@ class HomeScreen extends StatelessWidget {
         itemCount: categories.length,
         itemBuilder: (context, index) {
           final cat = categories[index];
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Column(
-              children: [
+          return GestureDetector(
+            onTap: () {
+              switch (cat['name']) {
+                case 'Yoga':
+                case 'Massage':
+                  ref.read(navigationProvider.notifier).setTab(2);
+                  break;
+                case 'Boutique':
+                  ref.read(navigationProvider.notifier).setTab(1);
+                  break;
+                case 'Retreats':
+                  context.push('/activities');
+                  break;
+                case 'Concierge':
+                  context.push('/concierge');
+                  break;
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Column(
+                children: [
                 Container(
                   width: 64,
                   height: 64,
@@ -163,6 +191,7 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(cat['name'] as String, style: AppTypography.caption),
               ],
+            ),
             ),
           );
         },
@@ -182,30 +211,14 @@ class HomeScreen extends StatelessWidget {
           final product = products[index];
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: GestureDetector(
+            child: ProductCard(
+              imageUrl: product.imageUrl,
+              title: product.title,
+              price: 'CHF ${product.price.toStringAsFixed(2)}',
+              index: index,
               onTap: () {
                 context.push('/product/${product.id}');
               },
-              child: SizedBox(
-                width: 160,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: CachedNetworkImage(
-                          imageUrl: product.imageUrl,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(product.title, style: AppTypography.body.copyWith(fontWeight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
-                    Text('CHF ${product.price.toStringAsFixed(2)}', style: AppTypography.body.copyWith(color: AppColors.forestGreen)),
-                  ],
-                ),
-              ),
             ),
           );
         },
@@ -213,8 +226,12 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWellnessPromo(BuildContext context) {
-    return Container(
+  Widget _buildWellnessPromo(BuildContext context, WidgetRef ref) {
+    return GestureDetector(
+      onTap: () {
+        ref.read(navigationProvider.notifier).setTab(2);
+      },
+      child: Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       height: 200,
       decoration: BoxDecoration(
@@ -234,11 +251,12 @@ class HomeScreen extends StatelessWidget {
           'Book a Session',
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: AppColors.primaryWhite),
         ),
+        ),
       ),
     );
   }
 
-  Widget _buildRentalsList() {
+  Widget _buildRentalsList(BuildContext context) {
     return SizedBox(
       height: 280,
       child: ListView.builder(
@@ -246,13 +264,15 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: 3,
         itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: SizedBox(
-              width: 280,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+          return GestureDetector(
+            onTap: () => context.push('/rentals'),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: SizedBox(
+                width: 280,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   Expanded(
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
@@ -267,6 +287,7 @@ class HomeScreen extends StatelessWidget {
                   Text('Ibiza, Spain', style: AppTypography.caption),
                 ],
               ),
+            ),
             ),
           );
         },
@@ -298,7 +319,7 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 24),
           PrimaryButton(
             text: 'Subscribe',
-            onPressed: () {},
+            onPressed: () => context.push('/club'),
           ),
         ],
       ),

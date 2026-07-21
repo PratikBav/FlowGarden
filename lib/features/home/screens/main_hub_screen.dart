@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
 import 'home_screen.dart';
 import '../../boutique/screens/boutique_screen.dart';
 import '../../wellness/screens/wellness_screen.dart';
 import '../../profile/screens/profile_screen.dart';
+import '../../../core/widgets/layout/fade_indexed_stack.dart';
 
-class MainHubScreen extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/providers/navigation_provider.dart';
+
+class MainHubScreen extends ConsumerWidget {
   const MainHubScreen({super.key});
-
-  @override
-  State<MainHubScreen> createState() => _MainHubScreenState();
-}
-
-class _MainHubScreenState extends State<MainHubScreen> {
-  int _currentIndex = 0;
 
   final List<Widget> _pages = const [
     HomeScreen(),
@@ -22,22 +18,19 @@ class _MainHubScreenState extends State<MainHubScreen> {
     ProfileScreen(),
   ];
 
-
-
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentIndex = ref.watch(navigationProvider);
+
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
+      body: FadeIndexedStack(
+        index: currentIndex,
         children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: currentIndex,
         onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          ref.read(navigationProvider.notifier).setTab(index);
         },
         items: const [
           BottomNavigationBarItem(

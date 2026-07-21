@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/buttons/primary_button.dart';
 import '../../../core/widgets/buttons/secondary_button.dart';
+import '../../../core/providers/cart_provider.dart';
+import '../../../dummy_data/mock_data.dart';
 
-class ProductDetailsScreen extends StatelessWidget {
+class ProductDetailsScreen extends ConsumerWidget {
   final String productId;
 
   const ProductDetailsScreen({super.key, required this.productId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final product = MockData.products.firstWhere(
+      (p) => p.id == productId,
+      orElse: () => MockData.products.first,
+    );
     return Scaffold(
       backgroundColor: AppColors.primaryWhite,
       body: CustomScrollView(
@@ -34,7 +41,7 @@ class ProductDetailsScreen extends StatelessWidget {
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: CachedNetworkImage(
-                imageUrl: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                imageUrl: product.imageUrl,
                 fit: BoxFit.cover,
               ),
             ),
@@ -50,12 +57,12 @@ class ProductDetailsScreen extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          'Organic Lavender Oil',
+                          product.title,
                           style: Theme.of(context).textTheme.headlineLarge,
                         ),
                       ),
                       Text(
-                        'CHF 45.00',
+                        'CHF ${product.price.toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.forestGreen),
                       ),
                     ],
@@ -79,7 +86,7 @@ class ProductDetailsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Premium organic lavender essential oil sourced from the fields of Provence. Perfect for relaxation, aromatherapy, and adding to your evening bath routine to promote deep sleep and reduce stress.',
+                    product.description,
                     style: AppTypography.body,
                   ),
                   const SizedBox(height: 40),
@@ -88,14 +95,29 @@ class ProductDetailsScreen extends StatelessWidget {
                       Expanded(
                         child: SecondaryButton(
                           text: 'Add to Cart',
-                          onPressed: () {},
+                          onPressed: () {
+                            ref.read(cartProvider.notifier).addProduct(product);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${product.title} added to cart'),
+                                duration: const Duration(seconds: 2),
+                                action: SnackBarAction(
+                                  label: 'View Cart',
+                                  onPressed: () => context.push('/cart'),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: PrimaryButton(
                           text: 'Buy Now',
-                          onPressed: () {},
+                          onPressed: () {
+                            ref.read(cartProvider.notifier).addProduct(product);
+                            context.push('/cart');
+                          },
                         ),
                       ),
                     ],

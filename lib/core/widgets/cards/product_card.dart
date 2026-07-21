@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_typography.dart';
 
@@ -8,6 +9,7 @@ class ProductCard extends StatelessWidget {
   final String title;
   final String price;
   final VoidCallback onTap;
+  final int? index;
 
   const ProductCard({
     super.key,
@@ -15,6 +17,7 @@ class ProductCard extends StatelessWidget {
     required this.title,
     required this.price,
     required this.onTap,
+    this.index,
   });
 
   @override
@@ -38,19 +41,20 @@ class ProductCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              child: CachedNetworkImage(
-                imageUrl: imageUrl,
-                height: 160,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  color: AppColors.lightGrey.withOpacity(0.3),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  color: AppColors.lightGrey.withOpacity(0.3),
-                  child: const Icon(Icons.error, color: AppColors.errorSoftRed),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: AppColors.lightGrey.withOpacity(0.3),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: AppColors.lightGrey.withOpacity(0.3),
+                    child: const Icon(Icons.error, color: AppColors.errorSoftRed),
+                  ),
                 ),
               ),
             ),
@@ -77,6 +81,6 @@ class ProductCard extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ).animate().fadeIn(delay: Duration(milliseconds: 100 * (index ?? 0))).slideY(begin: 0.1, end: 0, delay: Duration(milliseconds: 100 * (index ?? 0)));
   }
 }
