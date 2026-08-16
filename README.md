@@ -1,4 +1,4 @@
-# flow_garden
+# flow garden
 
 A new Flutter project.
 
